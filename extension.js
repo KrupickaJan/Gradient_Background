@@ -177,11 +177,14 @@ export default class ProceduralGradientExtension extends Extension {
     const rad = (angle * Math.PI) / 180;
     // Calculate gradient direction based on angle and scale
     // angle 0 = right, 90 = down, 180 = left, 270 = up
-    const distance = 2000 * scale;
-    const x1 = 1920 - distance * Math.cos(rad);
-    const y1 = 1080 - distance * Math.sin(rad);
-    const x2 = 1920 + distance * Math.cos(rad);
-    const y2 = 1080 + distance * Math.sin(rad);
+    const centerX = 1920;
+    const centerY = 1080;
+    const distanceX = 1920 * scale;
+    const distanceY = 1080 * scale;
+    const x1 = centerX - distanceX * Math.cos(rad);
+    const y1 = centerY - distanceY * Math.sin(rad);
+    const x2 = centerX + distanceX * Math.cos(rad);
+    const y2 = centerY + distanceY * Math.sin(rad);
 
     // Generate stops from array
     const stops = gradientStops
