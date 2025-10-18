@@ -60,13 +60,17 @@ export default class ProceduralGradientPreferences extends ExtensionPreferences 
         
         // Connect signals from gradient preview
         this._gradientPreview.connect('stop-selected', (widget, index) => {
+            // Save to settings when drag ends (not during drag!)
+            GradientUtils.saveGradientStops(this._settings, this._gradientStops);
             // Rebuild list when selection changes (after drag ends)
             this._rebuildColorStopsList();
         });
         
         this._gradientPreview.connect('stop-position-changed', (widget, index, position) => {
             this._gradientStops[index].position = position;
-            GradientUtils.saveGradientStops(this._settings, this._gradientStops);
+            // DON'T save here - it causes hundreds of I/O operations during drag!
+            // Saving is deferred until drag ends (stop-selected signal)
+            
             // Update the position label during drag without rebuilding the list
             if (this._positionLabels[index]) {
                 this._positionLabels[index].set_label(`${Math.round(position * 100)}%`);
