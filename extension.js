@@ -81,10 +81,33 @@ export default class ProceduralGradientExtension extends Extension {
   _createIndicator() {
     this._indicator = new PanelMenu.Button(0.0, 'Procedural Gradient', false);
 
-    // Create icon
+    // Create custom SVG icon
+    const svgIcon = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">  
+  
+  <!-- 3x3 grid with diagonal gradient and spacing -->
+  <!-- Row 1: Blue to cyan shades -->
+  <rect x="35" y="35" width="40" height="40" rx="9" fill="#0c2538ff"/>
+  <rect x="80" y="35" width="40" height="40" rx="9" fill="#255f8fff"/>
+  <rect x="125" y="35" width="40" height="40" rx="9" fill="#aa7d7aff"/>
+  
+  <!-- Row 2: Transitional shades -->
+  <rect x="35" y="80" width="40" height="40" rx="9" fill="#255f8fff"/>
+  <rect x="80" y="80" width="40" height="40" rx="9" fill="#9A9996"/>
+  <rect x="125" y="80" width="40" height="40" rx="9" fill="#d6574eff"/>
+  
+  <!-- Row 3: Purple to red shades -->
+  <rect x="35" y="125" width="40" height="40" rx="9" fill="#587f92ff"/>
+  <rect x="80" y="125" width="40" height="40" rx="9" fill="#d6574eff"/>
+  <rect x="125" y="125" width="40" height="40" rx="9" fill="#830000ff"/>
+</svg>`;
+
+    const bytes = new GLib.Bytes(svgIcon);
+    const gicon = Gio.BytesIcon.new(bytes);
+
     let icon = new St.Icon({
-      icon_name: 'media-playback-stop-symbolic',
+      gicon: gicon,
       style_class: 'system-status-icon',
+      icon_size: 24,
     });
     this._indicator.add_child(icon);
 
