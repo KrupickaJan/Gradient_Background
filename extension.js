@@ -86,19 +86,19 @@ export default class ProceduralGradientExtension extends Extension {
   
   <!-- 3x3 grid with diagonal gradient and spacing -->
   <!-- Row 1: Blue to cyan shades -->
-  <rect x="35" y="35" width="40" height="40" rx="9" fill="#0c2538ff"/>
-  <rect x="80" y="35" width="40" height="40" rx="9" fill="#255f8fff"/>
-  <rect x="125" y="35" width="40" height="40" rx="9" fill="#aa7d7aff"/>
+  <rect x="35" y="35" width="40" height="40" rx="9" fill="#272727ff"/>
+  <rect x="80" y="35" width="40" height="40" rx="9" fill="#494949ff"/>
+  <rect x="125" y="35" width="40" height="40" rx="9" fill="#bebebeff"/>
   
   <!-- Row 2: Transitional shades -->
-  <rect x="35" y="80" width="40" height="40" rx="9" fill="#255f8fff"/>
-  <rect x="80" y="80" width="40" height="40" rx="9" fill="#9A9996"/>
-  <rect x="125" y="80" width="40" height="40" rx="9" fill="#d6574eff"/>
+  <rect x="35" y="80" width="40" height="40" rx="9" fill="#494949ff"/>
+  <rect x="80" y="80" width="40" height="40" rx="9" fill="#ecececff"/>
+  <rect x="125" y="80" width="40" height="40" rx="9" fill="#494949ff"/>
   
   <!-- Row 3: Purple to red shades -->
-  <rect x="35" y="125" width="40" height="40" rx="9" fill="#587f92ff"/>
-  <rect x="80" y="125" width="40" height="40" rx="9" fill="#d6574eff"/>
-  <rect x="125" y="125" width="40" height="40" rx="9" fill="#830000ff"/>
+  <rect x="35" y="125" width="40" height="40" rx="9" fill="#bebebeff"/>
+  <rect x="80" y="125" width="40" height="40" rx="9" fill="#494949ff"/>
+  <rect x="125" y="125" width="40" height="40" rx="9" fill="#272727ff"/>
 </svg>`;
 
     const bytes = new GLib.Bytes(svgIcon);
