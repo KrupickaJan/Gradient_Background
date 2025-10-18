@@ -16,6 +16,16 @@ cp prefs.js "$INSTALL_DIR/"
 cp metadata.json "$INSTALL_DIR/"
 cp stylesheet.css "$INSTALL_DIR/"
 
+# Copy new module directories
+mkdir -p "$INSTALL_DIR/widgets"
+cp -r widgets/*.js "$INSTALL_DIR/widgets/"
+
+mkdir -p "$INSTALL_DIR/utils"
+cp -r utils/*.js "$INSTALL_DIR/utils/"
+
+mkdir -p "$INSTALL_DIR/generators"
+cp -r generators/*.js "$INSTALL_DIR/generators/"
+
 # Copy schemas
 mkdir -p "$INSTALL_DIR/schemas"
 cp schemas/*.xml "$INSTALL_DIR/schemas/"

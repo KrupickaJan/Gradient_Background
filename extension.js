@@ -5,6 +5,7 @@ import Clutter from 'gi://Clutter';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as SVGGenerators from './generators/svgGenerators.js';
 
 export default class ProceduralGradientExtension extends Extension {
   constructor(metadata) {
@@ -139,16 +140,16 @@ export default class ProceduralGradientExtension extends Extension {
       let svgGradient;
       switch (gradientType) {
         case 'linear':
-          svgGradient = this._generateLinearSVG(gradientStops, angle, scale);
+          svgGradient = SVGGenerators.generateLinearSVG(gradientStops, angle, scale);
           break;
         case 'radial':
-          svgGradient = this._generateRadialSVG(gradientStops, scale);
+          svgGradient = SVGGenerators.generateRadialSVG(gradientStops, scale);
           break;
         case 'noise':
-          svgGradient = this._generateNoiseSVG(gradientStops, noiseOctaves, scale, seed);
+          svgGradient = SVGGenerators.generateNoiseSVG(gradientStops, noiseOctaves, scale, seed);
           break;
         default:
-          svgGradient = this._generateLinearSVG(gradientStops, angle, scale);
+          svgGradient = SVGGenerators.generateLinearSVG(gradientStops, angle, scale);
       }
 
       const wallpaperPath = GLib.build_filenamev([this._cacheDir, 'wallpaper.svg']);
@@ -172,98 +173,4 @@ export default class ProceduralGradientExtension extends Extension {
       console.error('[ProcGrad] Stack: ' + e.stack);
     }
   }
-
-  _generateLinearSVG(gradientStops, angle, scale) {
-    const rad = (angle * Math.PI) / 180;
-    // Calculate gradient direction based on angle and scale
-    // angle 0 = right, 90 = down, 180 = left, 270 = up
-    const centerX = 1920;
-    const centerY = 1080;
-    const distanceX = 1920 * scale;
-    const distanceY = 1080 * scale;
-    const x1 = centerX - distanceX * Math.cos(rad);
-    const y1 = centerY - distanceY * Math.sin(rad);
-    const x2 = centerX + distanceX * Math.cos(rad);
-    const y2 = centerY + distanceY * Math.sin(rad);
-
-    // Generate stops from array
-    const stops = gradientStops
-      .map(stop => `      <stop offset="${(stop.position * 100).toFixed(1)}%" stop-color="${stop.color}"/>`)
-      .join('\n');
-
-    return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="3840" height="2160" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="grad" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" gradientUnits="userSpaceOnUse">
-${stops}
-    </linearGradient>
-  </defs>
-  <rect width="3840" height="2160" fill="url(#grad)"/>
-</svg>`;
-  }
-
-  _generateRadialSVG(gradientStops, scale) {
-    // Use userSpaceOnUse to avoid stretching
-    const centerX = 1920; // Half of 3840
-    const centerY = 1080; // Half of 2160
-    const radius = 1080 * scale; // Base radius on height to ensure it fits
-
-
-    // Generate stops from array
-    const stops = gradientStops
-      .map(stop => `      <stop offset="${(stop.position * 100).toFixed(1)}%" stop-color="${stop.color}"/>`)
-      .join('\n');
-
-    return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="3840" height="2160" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="grad" cx="${centerX}" cy="${centerY}" r="${radius}" gradientUnits="userSpaceOnUse">
-${stops}
-    </radialGradient>
-  </defs>
-  <rect width="3840" height="2160" fill="url(#grad)"/>
-</svg>`;
-  }
-
-  _generateNoiseSVG(gradientStops, octaves, globalScale, seedBase) {
-    // Use octaves to control number of gradients and globalScale to control size
-    const baseRadius = 1080 * 0.4 * globalScale; // Base on height in pixels
-    const gradientCount = Math.min(octaves + 2, 8);
-
-    let gradientDefs = '';
-    let gradientRects = '';
-
-    // Create base fill with last stop color
-    const baseColor = gradientStops[gradientStops.length - 1].color;
-    gradientRects += `  <rect width="3840" height="2160" fill="${baseColor}"/>\n`;
-
-    // Generate gradient definitions and rects based on octaves with randomized positions
-    for (let i = 0; i < gradientCount; i++) {
-      const seed = i * seedBase;
-      const rand1 = Math.sin(seed) * 43758.5453;
-      const rand2 = Math.sin(seed + 78.233) * 43758.5453;
-
-      // Use actual pixel coordinates
-      const cx = (rand1 - Math.floor(rand1)) * 3840;
-      const cy = (rand2 - Math.floor(rand2)) * 2160;
-      const r = baseRadius + ((rand1 - Math.floor(rand1)) * 1080 * 0.3 * globalScale);
-
-      const color = gradientStops[i % gradientStops.length].color;
-      const opacity = 0.4 + ((rand2 - Math.floor(rand2)) * 0.5);
-
-      gradientDefs += `    <radialGradient id="g${i}" cx="${cx}" cy="${cy}" r="${r}" gradientUnits="userSpaceOnUse">\n`;
-      gradientDefs += `      <stop offset="0%" stop-color="${color}" stop-opacity="${opacity}"/>\n`;
-      gradientDefs += `      <stop offset="100%" stop-color="${color}" stop-opacity="0"/>\n`;
-      gradientDefs += `    </radialGradient>\n`;
-
-      gradientRects += `  <rect width="3840" height="2160" fill="url(#g${i})"/>\n`;
-    }
-
-    return `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="3840" height="2160" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-${gradientDefs}  </defs>
-${gradientRects}</svg>`;
-  }
-
 }
