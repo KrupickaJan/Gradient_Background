@@ -338,6 +338,7 @@ export default class ProceduralGradientPreferences extends ExtensionPreferences 
         const settings = this.getSettings();
         this._settings = settings;
         this._gradientStops = this._loadGradientStops();
+        this._positionLabels = [];  // Store references to position labels
 
         // Create a preferences page
         const page = new Adw.PreferencesPage({
@@ -394,6 +395,10 @@ export default class ProceduralGradientPreferences extends ExtensionPreferences 
         this._gradientPreview.connect('stop-position-changed', (widget, index, position) => {
             this._gradientStops[index].position = position;
             this._saveGradientStops();
+            // Update the position label during drag without rebuilding the list
+            if (this._positionLabels[index]) {
+                this._positionLabels[index].set_label(`${Math.round(position * 100)}%`);
+            }
             // Don't rebuild during drag - it causes the "pushing" visual effect
             // List will rebuild when drag ends via stop-selected signal
         });
@@ -586,6 +591,9 @@ export default class ProceduralGradientPreferences extends ExtensionPreferences 
             child = next;
         }
 
+        // Clear position labels array
+        this._positionLabels = [];
+
         // Sort stops by position
         this._gradientStops.sort((a, b) => a.position - b.position);
 
@@ -598,45 +606,21 @@ export default class ProceduralGradientPreferences extends ExtensionPreferences 
 
     _createColorStopRow(stop, index) {
         const row = new Adw.ActionRow({
-            title: `Color Stop ${index + 1}`,
+            title: stop.color.toUpperCase(),
         });
 
-        // Position slider
-        const positionBox = new Gtk.Box({
-            orientation: Gtk.Orientation.HORIZONTAL,
-            spacing: 8,
-            margin_end: 8,
-        });
-
+        // Position label in the center
         const positionLabel = new Gtk.Label({
             label: `${Math.round(stop.position * 100)}%`,
-            width_chars: 4,
+            halign: Gtk.Align.START,
+            hexpand: true,
+            css_classes: ['dim-label'],
         });
-
-        const positionScale = new Gtk.Scale({
-            orientation: Gtk.Orientation.HORIZONTAL,
-            adjustment: new Gtk.Adjustment({
-                lower: 0,
-                upper: 100,
-                step_increment: 1,
-                page_increment: 10,
-                value: stop.position * 100,
-            }),
-            draw_value: false,
-            width_request: 250,
-        });
-
-        positionScale.connect('value-changed', (widget) => {
-            const newPosition = widget.get_value() / 100;
-            this._gradientStops[index].position = newPosition;
-            positionLabel.set_label(`${Math.round(newPosition * 100)}%`);
-            this._saveGradientStops();
-            this._updateGradientPreview();
-        });
-
-        positionBox.append(positionScale);
-        positionBox.append(positionLabel);
-        row.add_suffix(positionBox);
+        
+        // Store reference to the label for later updates
+        this._positionLabels[index] = positionLabel;
+        
+        row.add_suffix(positionLabel);
 
         // Color button
         const colorButton = new Gtk.ColorButton();
@@ -648,6 +632,7 @@ export default class ProceduralGradientPreferences extends ExtensionPreferences 
             const color = widget.get_rgba();
             const hexColor = `#${Math.round(color.red * 255).toString(16).padStart(2, '0')}${Math.round(color.green * 255).toString(16).padStart(2, '0')}${Math.round(color.blue * 255).toString(16).padStart(2, '0')}`;
             this._gradientStops[index].color = hexColor;
+            row.set_title(hexColor.toUpperCase());
             this._saveGradientStops();
             this._updateGradientPreview();
         });
