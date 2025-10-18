@@ -1,0 +1,29 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">  
+  <!-- Background with border -->
+  <rect x="15" y="15" width="170" height="170" rx="12" ry="12" fill="none" stroke="#2c2c2c" stroke-width="5"/>
+  
+  <!-- 4x4 grid with individual colors -->
+  <!-- Row 1: Blue-cyan to purple gradient -->
+  <rect x="25" y="25" width="33.75" height="33.75" fill="#0c2538ff"/>
+  <rect x="63.75" y="25" width="33.75" height="33.75" fill="#284b68ff"/>
+  <rect x="102.5" y="25" width="33.75" height="33.75" fill="#587f92ff"/>
+  <rect x="141.25" y="25" width="33.75" height="33.75" fill="#9A9996"/>
+  
+  <!-- Row 2: Blue to purple shades -->
+  <rect x="25" y="63.75" width="33.75" height="33.75" fill="#284b68ff"/>
+  <rect x="63.75" y="63.75" width="33.75" height="33.75" fill="#587f92ff"/>
+  <rect x="102.5" y="63.75" width="33.75" height="33.75" fill="#9A9996"/>
+  <rect x="141.25" y="63.75" width="33.75" height="33.75" fill="#b17672ff"/>
+  
+  <!-- Row 3: Purple to magenta shades -->
+  <rect x="25" y="102.5" width="33.75" height="33.75" fill="#587f92ff"/>
+  <rect x="63.75" y="102.5" width="33.75" height="33.75" fill="#9A9996"/>
+  <rect x="102.5" y="102.5" width="33.75" height="33.75" fill="#b17672ff"/>
+  <rect x="141.25" y="102.5" width="33.75" height="33.75" fill="#ac3836ff"/>
+  
+  <!-- Row 4: Magenta to orange gradient -->
+  <rect x="25" y="141.25" width="33.75" height="33.75" fill="#9A9996"/>
+  <rect x="63.75" y="141.25" width="33.75" height="33.75" fill="#b17672ff"/>
+  <rect x="102.5" y="141.25" width="33.75" height="33.75" fill="#bd3330ff"/>
+  <rect x="141.25" y="141.25" width="33.75" height="33.75" fill="#830000ff"/>
+</svg>
