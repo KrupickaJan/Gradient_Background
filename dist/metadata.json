@@ -1,0 +1,14 @@
+{
+  "uuid": "procedural-gradient-background@jan_krupicka",
+  "name": "Procedural Gradient Background",
+  "description": "Set beautiful procedural gradients as your workspace background.",
+  "version": 1,
+  "shell-version": [
+    "45",
+    "46",
+    "47",
+    "48"
+  ],
+  "url": "https://github.com/jan_krupicka/procedural-gradient-background",
+  "settings-schema": "org.gnome.shell.extensions.procedural-gradient-background"
+}

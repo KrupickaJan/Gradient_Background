@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.procedural-gradient-background" path="/org/gnome/shell/extensions/procedural-gradient-background/">
+    
+    <key name="gradient-type" type="s">
+      <default>'linear'</default>
+      <summary>Gradient Type</summary>
+      <description>The type of procedural gradient to generate</description>
+    </key>
+
+    <key name="angle" type="i">
+      <default>135</default>
+      <range min="0" max="360"/>
+      <summary>Gradient Angle</summary>
+      <description>Angle of linear gradient in degrees</description>
+    </key>
+
+    <key name="noise-octaves" type="i">
+      <default>4</default>
+      <range min="1" max="8"/>
+      <summary>Noise Octaves</summary>
+      <description>Number of octaves for noise generation</description>
+    </key>
+
+
+    <key name="noise-seed" type="i">
+      <default>4</default>
+      <range min="1" max="20"/>
+      <summary>Noise Seed</summary>
+      <description>Seed value for random noise pattern generation</description>
+    </key>
+
+    <key name="scale" type="d">
+      <default>1.0</default>
+      <range min="0.1" max="5.0"/>
+      <summary>Gradient Scale</summary>
+      <description>Scale factor for all gradient types</description>
+    </key>
+
+    <key name="gradient-stops" type="s">
+      <default>'[{"color":"#FF6B6B","position":0},{"color":"#4ECDC4","position":50},{"color":"#45B7D1","position":100}]'</default>
+      <summary>Gradient Stops</summary>
+      <description>JSON array of gradient stops with color and position (0-100)</description>
+    </key>
+
+    <key name="use-advanced-mode" type="b">
+      <default>false</default>
+      <summary>Use Advanced Gradient Editor</summary>
+      <description>Enable advanced gradient editor with custom stops</description>
+    </key>
+
+  </schema>
+</schemalist>

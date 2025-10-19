@@ -1,15 +1,12 @@
+import {GradientStop} from '../utils/gradientUtils';
 /**
  * SVG gradient generators for wallpaper creation
  */
 
 /**
  * Generate linear gradient SVG
- * @param {Array<{position: number, color: string}>} gradientStops - Array of gradient stops
- * @param {number} angle - Gradient angle in degrees
- * @param {number} scale - Scale factor for gradient
- * @returns {string} SVG markup
  */
-export function generateLinearSVG(gradientStops, angle, scale) {
+export function generateLinearSVG(gradientStops : GradientStop[], angle : number, scale : number) : string {
     const rad = (angle * Math.PI) / 180;
     // Calculate gradient direction based on angle and scale
     // angle 0 = right, 90 = down, 180 = left, 270 = up
@@ -40,11 +37,8 @@ ${stops}
 
 /**
  * Generate radial gradient SVG
- * @param {Array<{position: number, color: string}>} gradientStops - Array of gradient stops
- * @param {number} scale - Scale factor for gradient
- * @returns {string} SVG markup
  */
-export function generateRadialSVG(gradientStops, scale) {
+export function generateRadialSVG(gradientStops : GradientStop[], scale : number) {
     // Use userSpaceOnUse to avoid stretching
     const centerX = 1920; // Half of 3840
     const centerY = 1080; // Half of 2160
@@ -68,13 +62,8 @@ ${stops}
 
 /**
  * Generate noise gradient SVG
- * @param {Array<{position: number, color: string}>} gradientStops - Array of gradient stops
- * @param {number} octaves - Number of octaves for noise detail
- * @param {number} globalScale - Global scale factor
- * @param {number} seedBase - Seed for random generation
- * @returns {string} SVG markup
  */
-export function generateNoiseSVG(gradientStops, octaves, globalScale, seedBase) {
+export function generateNoiseSVG(gradientStops : GradientStop[], octaves : number, globalScale : number, seedBase : number) {
     // Use octaves to control number of gradients and globalScale to control size
     const baseRadius = 1080 * 0.4 * globalScale; // Base on height in pixels
     const gradientCount = Math.min(octaves + 2, 8);

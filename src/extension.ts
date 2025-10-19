@@ -2,22 +2,42 @@ import GLib from 'gi://GLib';
 import Gio from 'gi://Gio';
 import St from 'gi://St';
 import Clutter from 'gi://Clutter';
+
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as SVGGenerators from './generators/svgGenerators.js';
+import type { GradientStop } from './utils/gradientUtils.js';
+
+interface ExtensionMetadata {
+  uuid: string;
+  name: string;
+  description: string;
+  version: number;
+  'shell-version': string[];
+}
 
 export default class ProceduralGradientExtension extends Extension {
-  constructor(metadata) {
+  _settings: Gio.Settings | null;
+  _settingsChangedId: number | null;
+  _cacheDir: string | null;
+  _indicator: PanelMenu.Button | null;
+  _updateTimeout: number | null;
+
+  constructor(metadata: ExtensionMetadata) {
     super(metadata);
     this._settings = null;
+    this._settingsChangedId = null;
     this._cacheDir = null;
     this._indicator = null;
     this._updateTimeout = null;
   }
 
-  enable() {
-    console.log('[ProcGrad] Enabling extension');
+  enable(): void {
+    print('[ProcGrad] Enabling extension');
+    // @ts-ignore - getSettings is provided by Extension base class
     this._settings = this.getSettings();
 
     // Create cache directory
@@ -27,45 +47,47 @@ export default class ProceduralGradientExtension extends Extension {
     try {
       dir.make_directory_with_parents(null);
     } catch (e) {
-      console.log('[ProcGrad] Cache dir already exists');
+      print('[ProcGrad] Cache dir already exists');
     }
 
     // Create panel indicator
     this._createIndicator();
 
     // Connect to settings changes with debouncing
-    this._settingsChangedId = this._settings.connect('changed', () => {
-      // Cancel any pending update
-      if (this._updateTimeout) {
-        GLib.Source.remove(this._updateTimeout);
-        this._updateTimeout = null;
-      }
+    if (this._settings) {
+      this._settingsChangedId = this._settings.connect('changed', () => {
+        // Cancel any pending update
+        if (this._updateTimeout) {
+          GLib.Source.remove(this._updateTimeout);
+          this._updateTimeout = null;
+        }
 
-      // Schedule update after 300ms of no changes
-      this._updateTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 300, () => {
-        console.log('[ProcGrad] Settings changed, updating wallpaper');
-        this._updateWallpaper();
-        this._updateTimeout = null;
-        return GLib.SOURCE_REMOVE;
+        // Schedule update after 300ms of no changes
+        this._updateTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 300, () => {
+          print('[ProcGrad] Settings changed, updating wallpaper');
+          this._updateWallpaper();
+          this._updateTimeout = null;
+          return GLib.SOURCE_REMOVE;
+        });
       });
-    });
+    }
 
     // Initial wallpaper update
-    console.log('[ProcGrad] Setting initial wallpaper');
+    print('[ProcGrad] Setting initial wallpaper');
     this._updateWallpaper();
 
-    console.log('[ProcGrad] Extension enabled successfully');
+    print('[ProcGrad] Extension enabled successfully');
   }
 
-  disable() {
-    console.log('[ProcGrad] Disabling extension');
+  disable(): void {
+    print('[ProcGrad] Disabling extension');
 
     if (this._updateTimeout) {
       GLib.Source.remove(this._updateTimeout);
       this._updateTimeout = null;
     }
 
-    if (this._settingsChangedId) {
+    if (this._settingsChangedId && this._settings) {
       this._settings.disconnect(this._settingsChangedId);
       this._settingsChangedId = null;
     }
@@ -78,7 +100,7 @@ export default class ProceduralGradientExtension extends Extension {
     this._settings = null;
   }
 
-  _createIndicator() {
+  _createIndicator(): void {
     this._indicator = new PanelMenu.Button(0.0, 'Procedural Gradient', false);
 
     // Create custom SVG icon
@@ -101,10 +123,11 @@ export default class ProceduralGradientExtension extends Extension {
   <rect x="125" y="125" width="40" height="40" rx="9" fill="#272727ff"/>
 </svg>`;
 
-    const bytes = new GLib.Bytes(svgIcon);
-    const gicon = Gio.BytesIcon.new(bytes);
+    // @ts-ignore - TextEncoder is available in GJS
+    const svgBytes = new GLib.Bytes(new TextEncoder().encode(svgIcon));
+    const gicon = Gio.BytesIcon.new(svgBytes);
 
-    let icon = new St.Icon({
+    const icon = new St.Icon({
       gicon: gicon,
       style_class: 'system-status-icon',
       icon_size: 24,
@@ -113,6 +136,7 @@ export default class ProceduralGradientExtension extends Extension {
 
     // Connect click event to open preferences directly
     this._indicator.connect('button-press-event', () => {
+      // @ts-ignore - openPreferences is provided by Extension base class
       this.openPreferences();
       return Clutter.EVENT_STOP;
     });
@@ -121,7 +145,11 @@ export default class ProceduralGradientExtension extends Extension {
     Main.panel.addToStatusArea('procedural-gradient-indicator', this._indicator);
   }
 
-  _updateWallpaper() {
+  _updateWallpaper(): void {
+    if (!this._settings || !this._cacheDir) {
+      return;
+    }
+
     try {
       const gradientType = this._settings.get_string('gradient-type');
       const angle = this._settings.get_int('angle');
@@ -130,20 +158,21 @@ export default class ProceduralGradientExtension extends Extension {
       const useAdvancedMode = this._settings.get_boolean('use-advanced-mode');
       const seed = this._settings.get_int('noise-seed');
 
-      let gradientStops;
+      let gradientStops: GradientStop[];
       if (useAdvancedMode) {
         // Parse gradient stops from JSON
         try {
           const stopsJson = this._settings.get_string('gradient-stops');
-          gradientStops = JSON.parse(stopsJson);
+          gradientStops = JSON.parse(stopsJson) as GradientStop[];
           // Sort stops by position for correct SVG rendering
-          gradientStops.sort((a, b) => a.position - b.position);
+          gradientStops.sort((a: GradientStop, b: GradientStop) => a.position - b.position);
         } catch (e) {
-          console.error('[ProcGrad] Failed to parse gradient stops, using defaults: ' + e.message);
+          const error = e as Error;
+          logError(error, '[ProcGrad] Failed to parse gradient stops, using defaults');
           gradientStops = [
             { color: '#FF6B6B', position: 0 },
-            { color: '#4ECDC4', position: 50 },
-            { color: '#45B7D1', position: 100 }
+            { color: '#4ECDC4', position: 0.5 },
+            { color: '#45B7D1', position: 1.0 }
           ];
         }
       } else {
@@ -154,13 +183,13 @@ export default class ProceduralGradientExtension extends Extension {
         const useThreeColors = this._settings.get_boolean('use-three-colors');
 
         gradientStops = useThreeColors
-          ? [{ color: color1, position: 0 }, { color: color2, position: 50 }, { color: color3, position: 100 }]
-          : [{ color: color1, position: 0 }, { color: color2, position: 100 }];
+          ? [{ color: color1, position: 0 }, { color: color2, position: 0.5 }, { color: color3, position: 1.0 }]
+          : [{ color: color1, position: 0 }, { color: color2, position: 1.0 }];
       }
 
-      console.log('[ProcGrad] Creating wallpaper: ' + gradientType + ' with ' + gradientStops.length + ' stops and scale ' + scale);
+      print(`[ProcGrad] Creating wallpaper: ${gradientType} with ${gradientStops.length} stops and scale ${scale}`);
 
-      let svgGradient;
+      let svgGradient: string;
       switch (gradientType) {
         case 'linear':
           svgGradient = SVGGenerators.generateLinearSVG(gradientStops, angle, scale);
@@ -182,18 +211,18 @@ export default class ProceduralGradientExtension extends Extension {
       stream.write_all(svgGradient, null);
       stream.close(null);
 
-      console.log('[ProcGrad] Wallpaper saved to: ' + wallpaperPath);
+      print(`[ProcGrad] Wallpaper saved to: ${wallpaperPath}`);
 
       // Set wallpaper using gsettings
       const settings = new Gio.Settings({ schema_id: 'org.gnome.desktop.background' });
-      settings.set_string('picture-uri', 'file://' + wallpaperPath);
-      settings.set_string('picture-uri-dark', 'file://' + wallpaperPath);
+      settings.set_string('picture-uri', `file://${wallpaperPath}`);
+      settings.set_string('picture-uri-dark', `file://${wallpaperPath}`);
       settings.set_string('picture-options', 'zoom');
 
-      console.log('[ProcGrad] Wallpaper set successfully');
+      print('[ProcGrad] Wallpaper set successfully');
     } catch (e) {
-      console.error('[ProcGrad] Error: ' + e.message);
-      console.error('[ProcGrad] Stack: ' + e.stack);
+      const error = e as Error;
+      logError(error, '[ProcGrad] Error updating wallpaper');
     }
   }
 }

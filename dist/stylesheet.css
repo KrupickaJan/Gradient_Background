@@ -1,0 +1,5 @@
+.procedural-gradient-background {
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+}

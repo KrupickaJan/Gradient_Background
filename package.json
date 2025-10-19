@@ -1,0 +1,38 @@
+{
+  "name": "extension",
+  "version": "1.0.0",
+  "description": "A GNOME Shell extension that generates procedural gradient wallpapers in real-time for your desktop.",
+  "main": "extension.js",
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "cp -r schemas dist/ && cp metadata.json dist/ && cp stylesheet.css dist/",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install-extension": "npm run build && ./install.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KrupickaJan/Gradient_Background.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KrupickaJan/Gradient_Background/issues"
+  },
+  "homepage": "https://github.com/KrupickaJan/Gradient_Background#readme",
+  "devDependencies": {
+    "@girs/adw-1": "^1.9.0-4.0.0-beta.38",
+    "@girs/clutter-15": "^15.0.0-4.0.0-beta.38",
+    "@girs/gdk-4.0": "^4.0.0-4.0.0-beta.38",
+    "@girs/gio-2.0": "^2.86.0-4.0.0-beta.38",
+    "@girs/gjs": "^4.0.0-beta.38",
+    "@girs/glib-2.0": "^2.86.0-4.0.0-beta.38",
+    "@girs/gnome-shell": "^49.0.3",
+    "@girs/gtk-4.0": "^4.20.1-4.0.0-beta.38",
+    "@girs/shell-14": "^14.0.0-4.0.0-beta.38",
+    "@girs/st-15": "^15.0.0-4.0.0-beta.38",
+    "typescript": "^5.9.3"
+  }
+}

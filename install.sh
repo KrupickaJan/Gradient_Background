@@ -6,30 +6,25 @@ EXTENSION_UUID="procedural-gradient-background@jan_krupicka"
 INSTALL_DIR="$HOME/.local/share/gnome-shell/extensions/$EXTENSION_UUID"
 
 echo "Installing $EXTENSION_UUID..."
+echo "Building extension..."
+npm run build
+
+if [ $? -ne 0 ]; then
+    echo "Build failed!"
+    exit 1
+fi
 
 # Create installation directory
+echo "Creating installation directory..."
 mkdir -p "$INSTALL_DIR"
 
-# Copy extension files
-cp extension.js "$INSTALL_DIR/"
-cp prefs.js "$INSTALL_DIR/"
-cp metadata.json "$INSTALL_DIR/"
-cp stylesheet.css "$INSTALL_DIR/"
+# Copy all files from dist to installation directory
+echo "Copying extension files..."
+cp -r dist/* "$INSTALL_DIR/"
 
-# Copy new module directories
-mkdir -p "$INSTALL_DIR/widgets"
-cp -r widgets/*.js "$INSTALL_DIR/widgets/"
-
-mkdir -p "$INSTALL_DIR/utils"
-cp -r utils/*.js "$INSTALL_DIR/utils/"
-
-mkdir -p "$INSTALL_DIR/generators"
-cp -r generators/*.js "$INSTALL_DIR/generators/"
-
-# Copy schemas
-mkdir -p "$INSTALL_DIR/schemas"
-cp schemas/*.xml "$INSTALL_DIR/schemas/"
-cp schemas/gschemas.compiled "$INSTALL_DIR/schemas/"
+# Compile GSettings schemas
+echo "Compiling GSettings schemas..."
+glib-compile-schemas "$INSTALL_DIR/schemas/"
 
 echo "Extension files copied successfully!"
 echo ""
