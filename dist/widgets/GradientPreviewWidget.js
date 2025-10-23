@@ -25,14 +25,13 @@ export const GradientPreviewWidget = GObject.registerClass({
             hexpand: true,
             vexpand: false,
         });
-        this._gradientStops = gradientStops;
+        this._gradientStops = gradientStops || [];
         this._angle = angle;
         this._selectedStop = -1;
         this._draggedStop = -1;
         this._hoverStop = -1;
         this._dragStartX = undefined;
         this._dragStartPosition = undefined;
-        print('[GradientPreview] Initializing with', this._gradientStops.length, 'stops');
         this.set_draw_func(this._draw.bind(this));
         // Add gesture controllers for interaction
         const clickGesture = new Gtk.GestureClick();
@@ -48,10 +47,9 @@ export const GradientPreviewWidget = GObject.registerClass({
         motionController.connect('motion', this._onMotion.bind(this));
         motionController.connect('leave', this._onLeave.bind(this));
         this.add_controller(motionController);
-        print('[GradientPreview] Widget initialized');
     }
     updateGradient(stops, angle) {
-        this._gradientStops = stops;
+        this._gradientStops = stops || [];
         this._angle = angle;
         this.queue_draw();
     }
@@ -59,8 +57,7 @@ export const GradientPreviewWidget = GObject.registerClass({
         this._selectedStop = index;
         this.queue_draw();
     }
-    _draw(_area, cairoContext, width, height) {
-        print('[GradientPreview] Drawing, width:', width, 'height:', height, 'stops:', this._gradientStops.length);
+    _draw(_area, cairoContext, width, _height) {
         const barHeight = 40;
         const barY = 20;
         const handleRadius = 8;
@@ -187,7 +184,6 @@ export const GradientPreviewWidget = GObject.registerClass({
             cairoContext.moveTo(x - extents.width / 2, barY + barHeight + 15);
             cairoContext.showText(text);
         });
-        print('[GradientPreview] Drawing complete');
     }
     _getStopAtPosition(x, y) {
         const width = this.get_allocated_width();
@@ -237,7 +233,6 @@ export const GradientPreviewWidget = GObject.registerClass({
             this._dragStartX = startX;
             this._dragStartPosition = this._gradientStops[stopIndex].position;
             this.emit('stop-selected', stopIndex);
-            print('[GradientPreview] Drag begin at', startX, 'for stop', stopIndex, 'at position', this._dragStartPosition);
         }
     }
     _onDragUpdate(_gesture, offsetX, _offsetY) {

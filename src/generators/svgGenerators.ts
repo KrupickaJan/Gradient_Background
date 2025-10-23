@@ -6,14 +6,19 @@ import {GradientStop} from '../utils/gradientUtils';
 /**
  * Generate linear gradient SVG
  */
-export function generateLinearSVG(gradientStops : GradientStop[], angle : number, scale : number) : string {
+export function generateLinearSVG(gradientStops: GradientStop[], angle: number, scale: number): string {
+    if (!gradientStops || gradientStops.length < 2) {
+        return getFallbackSVG();
+    }
+    
+    const safeScale = Math.max(0.1, Math.min(10, scale || 1));
     const rad = (angle * Math.PI) / 180;
+    
     // Calculate gradient direction based on angle and scale
-    // angle 0 = right, 90 = down, 180 = left, 270 = up
     const centerX = 1920;
     const centerY = 1080;
-    const distanceX = 1920 * scale;
-    const distanceY = 1080 * scale;
+    const distanceX = 1920 * safeScale;
+    const distanceY = 1080 * safeScale;
     const x1 = centerX - distanceX * Math.cos(rad);
     const y1 = centerY - distanceY * Math.sin(rad);
     const x2 = centerX + distanceX * Math.cos(rad);
@@ -38,11 +43,17 @@ ${stops}
 /**
  * Generate radial gradient SVG
  */
-export function generateRadialSVG(gradientStops : GradientStop[], scale : number) {
+export function generateRadialSVG(gradientStops: GradientStop[], scale: number) {
+    if (!gradientStops || gradientStops.length < 2) {
+        return getFallbackSVG();
+    }
+    
+    const safeScale = Math.max(0.1, Math.min(10, scale || 1));
+    
     // Use userSpaceOnUse to avoid stretching
     const centerX = 1920; // Half of 3840
     const centerY = 1080; // Half of 2160
-    const radius = 1080 * scale; // Base radius on height to ensure it fits
+    const radius = 1080 * safeScale; // Base radius on height to ensure it fits
 
     // Generate stops from array
     const stops = gradientStops
@@ -63,10 +74,17 @@ ${stops}
 /**
  * Generate noise gradient SVG
  */
-export function generateNoiseSVG(gradientStops : GradientStop[], octaves : number, globalScale : number, seedBase : number) {
+export function generateNoiseSVG(gradientStops: GradientStop[], octaves: number, globalScale: number, seedBase: number) {
+    if (!gradientStops || gradientStops.length < 2) {
+        return getFallbackSVG();
+    }
+    
+    const safeOctaves = Math.max(1, Math.min(8, octaves || 1));
+    const safeScale = Math.max(0.1, Math.min(10, globalScale || 1));
+
     // Use octaves to control number of gradients and globalScale to control size
-    const baseRadius = 1080 * 0.4 * globalScale; // Base on height in pixels
-    const gradientCount = Math.min(octaves + 2, 8);
+    const baseRadius = 1080 * 0.4 * safeScale; // Base on height in pixels
+    const gradientCount = Math.min(safeOctaves + 2, 8);
 
     let gradientDefs = '';
     let gradientRects = '';
@@ -84,7 +102,7 @@ export function generateNoiseSVG(gradientStops : GradientStop[], octaves : numbe
         // Use actual pixel coordinates
         const cx = (rand1 - Math.floor(rand1)) * 3840;
         const cy = (rand2 - Math.floor(rand2)) * 2160;
-        const r = baseRadius + ((rand1 - Math.floor(rand1)) * 1080 * 0.3 * globalScale);
+        const r = baseRadius + ((rand1 - Math.floor(rand1)) * 1080 * 0.3 * safeScale);
 
         const color = gradientStops[i % gradientStops.length].color;
         const opacity = 0.4 + ((rand2 - Math.floor(rand2)) * 0.5);
@@ -102,4 +120,17 @@ export function generateNoiseSVG(gradientStops : GradientStop[], octaves : numbe
   <defs>
 ${gradientDefs}  </defs>
 ${gradientRects}</svg>`;
+}
+
+function getFallbackSVG(): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="3840" height="2160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="3840" y2="2160" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF6B6B"/>
+      <stop offset="100%" stop-color="#4ECDC4"/>
+    </linearGradient>
+  </defs>
+  <rect width="3840" height="2160" fill="url(#grad)"/>
+</svg>`;
 }

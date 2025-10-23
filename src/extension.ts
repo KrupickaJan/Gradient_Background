@@ -36,18 +36,16 @@ export default class ProceduralGradientExtension extends Extension {
   }
 
   enable(): void {
-    print('[ProcGrad] Enabling extension');
     // @ts-ignore - getSettings is provided by Extension base class
     this._settings = this.getSettings();
 
     // Create cache directory
     this._cacheDir = GLib.build_filenamev([GLib.get_user_cache_dir(), 'procedural-gradient']);
     const dir = Gio.File.new_for_path(this._cacheDir);
-
     try {
       dir.make_directory_with_parents(null);
     } catch (e) {
-      print('[ProcGrad] Cache dir already exists');
+      // Cache directory already exists, continue
     }
 
     // Create panel indicator
@@ -56,32 +54,15 @@ export default class ProceduralGradientExtension extends Extension {
     // Connect to settings changes with debouncing
     if (this._settings) {
       this._settingsChangedId = this._settings.connect('changed', () => {
-        // Cancel any pending update
-        if (this._updateTimeout) {
-          GLib.Source.remove(this._updateTimeout);
-          this._updateTimeout = null;
-        }
-
-        // Schedule update after 300ms of no changes
-        this._updateTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 300, () => {
-          print('[ProcGrad] Settings changed, updating wallpaper');
-          this._updateWallpaper();
-          this._updateTimeout = null;
-          return GLib.SOURCE_REMOVE;
-        });
+        this._scheduleUpdate();
       });
     }
 
     // Initial wallpaper update
-    print('[ProcGrad] Setting initial wallpaper');
     this._updateWallpaper();
-
-    print('[ProcGrad] Extension enabled successfully');
   }
 
   disable(): void {
-    print('[ProcGrad] Disabling extension');
-
     if (this._updateTimeout) {
       GLib.Source.remove(this._updateTimeout);
       this._updateTimeout = null;
@@ -146,6 +127,21 @@ export default class ProceduralGradientExtension extends Extension {
     Main.panel.addToStatusArea('procedural-gradient-indicator', this._indicator);
   }
 
+  _scheduleUpdate(): void {
+    // Cancel any pending update
+    if (this._updateTimeout) {
+      GLib.Source.remove(this._updateTimeout);
+      this._updateTimeout = null;
+    }
+
+    // Schedule update after 300ms of no changes
+    this._updateTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 300, () => {
+      this._updateWallpaper();
+      this._updateTimeout = null;
+      return GLib.SOURCE_REMOVE;
+    });
+  }
+
   _updateWallpaper(): void {
     if (!this._settings || !this._cacheDir) {
       return;
@@ -168,8 +164,7 @@ export default class ProceduralGradientExtension extends Extension {
           // Sort stops by position for correct SVG rendering
           gradientStops.sort((a: GradientStop, b: GradientStop) => a.position - b.position);
         } catch (e) {
-          const error = e as Error;
-          logError(error, '[ProcGrad] Failed to parse gradient stops, using defaults');
+          logError(e as Error, 'Failed to parse gradient stops, using defaults');
           gradientStops = [
             { color: '#FF6B6B', position: 0 },
             { color: '#4ECDC4', position: 0.5 },
@@ -187,8 +182,6 @@ export default class ProceduralGradientExtension extends Extension {
           ? [{ color: color1, position: 0 }, { color: color2, position: 0.5 }, { color: color3, position: 1.0 }]
           : [{ color: color1, position: 0 }, { color: color2, position: 1.0 }];
       }
-
-      print(`[ProcGrad] Creating wallpaper: ${gradientType} with ${gradientStops.length} stops and scale ${scale}`);
 
       let svgGradient: string;
       switch (gradientType) {
@@ -212,18 +205,13 @@ export default class ProceduralGradientExtension extends Extension {
       stream.write_all(svgGradient, null);
       stream.close(null);
 
-      print(`[ProcGrad] Wallpaper saved to: ${wallpaperPath}`);
-
       // Set wallpaper using gsettings
       const settings = new Gio.Settings({ schema_id: 'org.gnome.desktop.background' });
       settings.set_string('picture-uri', `file://${wallpaperPath}`);
       settings.set_string('picture-uri-dark', `file://${wallpaperPath}`);
       settings.set_string('picture-options', 'zoom');
-
-      print('[ProcGrad] Wallpaper set successfully');
     } catch (e) {
-      const error = e as Error;
-      logError(error, '[ProcGrad] Error updating wallpaper');
+      logError(e as Error, 'Failed to update wallpaper');
     }
   }
 }

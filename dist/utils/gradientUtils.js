@@ -2,20 +2,23 @@
  * Parse hex color to RGB object
  */
 export function parseHexColor(hexColor) {
-    const hex = hexColor.replace('#', '');
+    const hex = (hexColor || '').replace('#', '');
+    if (hex.length !== 6) {
+        return { r: 0, g: 0, b: 0 }; // Default to black
+    }
     return {
-        r: parseInt(hex.slice(0, 2), 16),
-        g: parseInt(hex.slice(2, 4), 16),
-        b: parseInt(hex.slice(4, 6), 16),
+        r: parseInt(hex.slice(0, 2), 16) || 0,
+        g: parseInt(hex.slice(2, 4), 16) || 0,
+        b: parseInt(hex.slice(4, 6), 16) || 0,
     };
 }
 /**
  * Convert RGB object to hex color string
  */
 export function rgbToHex(rgb) {
-    const r = Math.round(rgb.r).toString(16).padStart(2, '0');
-    const g = Math.round(rgb.g).toString(16).padStart(2, '0');
-    const b = Math.round(rgb.b).toString(16).padStart(2, '0');
+    const r = Math.max(0, Math.min(255, Math.round(rgb.r || 0))).toString(16).padStart(2, '0');
+    const g = Math.max(0, Math.min(255, Math.round(rgb.g || 0))).toString(16).padStart(2, '0');
+    const b = Math.max(0, Math.min(255, Math.round(rgb.b || 0))).toString(16).padStart(2, '0');
     return `#${r}${g}${b}`;
 }
 /**
@@ -26,6 +29,9 @@ export function rgbToHex(rgb) {
  * @returns {string} Interpolated hex color
  */
 export function interpolateColor(leftStop, rightStop, position) {
+    if (!leftStop || !rightStop || position < 0 || position > 1) {
+        return '#000000'; // Default to black
+    }
     const left = parseHexColor(leftStop.color);
     const right = parseHexColor(rightStop.color);
     // Calculate interpolation factor (0 to 1)
@@ -46,28 +52,55 @@ export function interpolateColor(leftStop, rightStop, position) {
  * Load gradient stops from settings
  */
 export function loadGradientStops(settings) {
+    if (!settings) {
+        return getDefaultGradientStops();
+    }
     try {
         const stopsJson = settings.get_string('gradient-stops');
         if (stopsJson && stopsJson !== '[]') {
-            return JSON.parse(stopsJson);
+            const parsed = JSON.parse(stopsJson);
+            if (Array.isArray(parsed) && parsed.length >= 2) {
+                return parsed;
+            }
         }
     }
     catch (e) {
-        logError(e, '[ProcGrad] Failed to parse gradient stops.');
+        logError(e, 'Failed to parse gradient stops from settings');
     }
     // Default: create from old color1, color2, color3 settings
+    try {
+        return [
+            { position: 0.0, color: settings.get_string('color1') },
+            { position: 0.5, color: settings.get_string('color2') },
+            { position: 1.0, color: settings.get_string('color3') }
+        ];
+    }
+    catch (e) {
+        logError(e, 'Failed to load default gradient stops');
+        return getDefaultGradientStops();
+    }
+}
+function getDefaultGradientStops() {
     return [
-        { position: 0.0, color: settings.get_string('color1') },
-        { position: 0.5, color: settings.get_string('color2') },
-        { position: 1.0, color: settings.get_string('color3') }
+        { position: 0.0, color: '#FF6B6B' },
+        { position: 0.5, color: '#4ECDC4' },
+        { position: 1.0, color: '#45B7D1' }
     ];
 }
 /**
  * Save gradient stops to settings
  */
 export function saveGradientStops(settings, gradientStops) {
-    const stopsJson = JSON.stringify(gradientStops);
-    settings.set_string('gradient-stops', stopsJson);
+    if (!settings || !Array.isArray(gradientStops) || gradientStops.length < 2) {
+        return;
+    }
+    try {
+        const stopsJson = JSON.stringify(gradientStops);
+        settings.set_string('gradient-stops', stopsJson);
+    }
+    catch (e) {
+        logError(e, 'Failed to save gradient stops');
+    }
 }
 /**
  * Find the best position to add a new gradient stop

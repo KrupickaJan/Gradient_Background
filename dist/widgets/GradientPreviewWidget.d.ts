@@ -13,7 +13,7 @@ export declare const GradientPreviewWidget: {
         _dragStartPosition?: number;
         updateGradient(stops: GradientStop[], angle: number): void;
         setSelectedStop(index: number): void;
-        _draw(_area: Gtk.DrawingArea, cairoContext: any, width: number, height: number): void;
+        _draw(_area: Gtk.DrawingArea, cairoContext: any, width: number, _height: number): void;
         _getStopAtPosition(x: number, y: number): number;
         _onPressed(_gesture: Gtk.GestureClick, nPress: number, x: number, y: number): void;
         _onReleased(_gesture: Gtk.GestureClick, _nPress: number, _x: number, _y: number): void;

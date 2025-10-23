@@ -18,6 +18,7 @@ export default class ProceduralGradientExtension extends Extension {
     enable(): void;
     disable(): void;
     _createIndicator(): void;
+    _scheduleUpdate(): void;
     _updateWallpaper(): void;
 }
 export {};

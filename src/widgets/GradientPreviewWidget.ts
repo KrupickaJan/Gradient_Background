@@ -13,11 +13,11 @@ export const GradientPreviewWidget = GObject.registerClass({
     },
 }, class GradientPreviewWidget extends Gtk.DrawingArea {
 
-    _gradientStops: GradientStop[];
-    _angle: number;
-    _selectedStop: number;
-    _draggedStop: number;
-    _hoverStop: number;
+    _gradientStops!: GradientStop[];
+    _angle!: number;
+    _selectedStop!: number;
+    _draggedStop!: number;
+    _hoverStop!: number;
     _dragStartX?: number;
     _dragStartPosition?: number;
 
@@ -30,15 +30,13 @@ export const GradientPreviewWidget = GObject.registerClass({
             vexpand: false,
         });
 
-        this._gradientStops = gradientStops;
+        this._gradientStops = gradientStops || [];
         this._angle = angle;
         this._selectedStop = -1;
         this._draggedStop = -1;
         this._hoverStop = -1;
         this._dragStartX = undefined;
         this._dragStartPosition = undefined;
-
-        print('[GradientPreview] Initializing with', this._gradientStops.length, 'stops');
 
         this.set_draw_func(this._draw.bind(this));
 
@@ -58,12 +56,10 @@ export const GradientPreviewWidget = GObject.registerClass({
         motionController.connect('motion', this._onMotion.bind(this));
         motionController.connect('leave', this._onLeave.bind(this));
         this.add_controller(motionController);
-
-        print('[GradientPreview] Widget initialized');
     }
 
     updateGradient(stops: GradientStop[], angle: number) {
-        this._gradientStops = stops;
+        this._gradientStops = stops || [];
         this._angle = angle;
         this.queue_draw();
     }
@@ -73,9 +69,7 @@ export const GradientPreviewWidget = GObject.registerClass({
         this.queue_draw();
     }
 
-    _draw(_area: Gtk.DrawingArea, cairoContext: any, width: number, height: number) {
-        print('[GradientPreview] Drawing, width:', width, 'height:', height, 'stops:', this._gradientStops.length);
-
+    _draw(_area: Gtk.DrawingArea, cairoContext: any, width: number, _height: number) {
         const barHeight = 40;
         const barY = 20;
         const handleRadius = 8;
@@ -222,8 +216,6 @@ export const GradientPreviewWidget = GObject.registerClass({
             cairoContext.moveTo(x - extents.width / 2, barY + barHeight + 15);
             cairoContext.showText(text);
         });
-
-        print('[GradientPreview] Drawing complete');
     }
 
     _getStopAtPosition(x: number, y: number): number {
@@ -280,7 +272,6 @@ export const GradientPreviewWidget = GObject.registerClass({
             this._dragStartX = startX;
             this._dragStartPosition = this._gradientStops[stopIndex].position;
             this.emit('stop-selected', stopIndex);
-            print('[GradientPreview] Drag begin at', startX, 'for stop', stopIndex, 'at position', this._dragStartPosition);
         }
     }
 

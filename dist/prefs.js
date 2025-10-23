@@ -11,185 +11,191 @@ export default class extends ExtensionPreferences {
     #colorStopsListBox;
     #gradientPreview;
     async fillPreferencesWindow(window) {
-        const settings = this.getSettings();
-        this.#settings = settings;
-        this.#gradientStops = GradientUtils.loadGradientStops(settings);
-        this.#positionLabels = [];
-        // Create a preferences page
-        const page = new Adw.PreferencesPage({
-            title: 'General',
-            icon_name: 'dialog-information-symbolic',
-        });
-        window.add(page);
-        // Gradient Type Group
-        const gradientGroup = new Adw.PreferencesGroup({
-            title: 'Gradient Type',
-            description: 'Choose the type of procedural gradient',
-        });
-        page.add(gradientGroup);
-        // Gradient type selector
-        const gradientTypeRow = new Adw.ComboRow({
-            title: 'Gradient Type',
-            subtitle: 'Select gradient algorithm',
-        });
-        const gradientModel = new Gtk.StringList();
-        gradientModel.append('Linear');
-        gradientModel.append('Radial');
-        gradientModel.append('Noise');
-        gradientTypeRow.set_model(gradientModel);
-        const types = ['linear', 'radial', 'noise'];
-        gradientTypeRow.set_selected(types.indexOf(settings.get_string('gradient-type')));
-        gradientTypeRow.connect('notify::selected', (widget) => {
-            settings.set_string('gradient-type', types[widget.selected]);
-        });
-        gradientGroup.add(gradientTypeRow);
-        // Color Stops Group
-        const colorGroup = new Adw.PreferencesGroup({
-            title: 'Gradient Preview',
-            description: 'Drag handles to adjust positions, double-click bar to add stops',
-        });
-        page.add(colorGroup);
-        // Add the gradient preview widget
-        this.#gradientPreview = new GradientPreviewWidget(this.#gradientStops, settings.get_int('angle'));
-        // Connect signals from gradient preview
-        this.#gradientPreview.connect('stop-selected', (_widget, _index) => {
-            GradientUtils.saveGradientStops(this.#settings, this.#gradientStops);
+        try {
+            const settings = this.getSettings();
+            this.#settings = settings;
+            this.#gradientStops = GradientUtils.loadGradientStops(settings);
+            this.#positionLabels = [];
+            // Create a preferences page
+            const page = new Adw.PreferencesPage({
+                title: 'General',
+                icon_name: 'dialog-information-symbolic',
+            });
+            window.add(page);
+            // Gradient Type Group
+            const gradientGroup = new Adw.PreferencesGroup({
+                title: 'Gradient Type',
+                description: 'Choose the type of procedural gradient',
+            });
+            page.add(gradientGroup);
+            // Gradient type selector
+            const gradientTypeRow = new Adw.ComboRow({
+                title: 'Gradient Type',
+                subtitle: 'Select gradient algorithm',
+            });
+            const gradientModel = new Gtk.StringList();
+            gradientModel.append('Linear');
+            gradientModel.append('Radial');
+            gradientModel.append('Noise');
+            gradientTypeRow.set_model(gradientModel);
+            const types = ['linear', 'radial', 'noise'];
+            gradientTypeRow.set_selected(types.indexOf(settings.get_string('gradient-type')));
+            gradientTypeRow.connect('notify::selected', (widget) => {
+                settings.set_string('gradient-type', types[widget.selected]);
+            });
+            gradientGroup.add(gradientTypeRow);
+            // Color Stops Group
+            const colorGroup = new Adw.PreferencesGroup({
+                title: 'Gradient Preview',
+                description: 'Drag handles to adjust positions, double-click bar to add stops',
+            });
+            page.add(colorGroup);
+            // Add the gradient preview widget
+            this.#gradientPreview = new GradientPreviewWidget(this.#gradientStops, settings.get_int('angle'));
+            // Connect signals from gradient preview
+            this.#gradientPreview.connect('stop-selected', (_widget, _index) => {
+                GradientUtils.saveGradientStops(this.#settings, this.#gradientStops);
+                this.#rebuildColorStopsList();
+            });
+            this.#gradientPreview.connect('stop-position-changed', (_widget, index, position) => {
+                this.#gradientStops[index].position = position;
+                if (this.#positionLabels[index]) {
+                    this.#positionLabels[index].set_label(`${Math.round(position * 100)}%`);
+                }
+            });
+            this.#gradientPreview.connect('stop-added', (_widget, position) => {
+                this.#addColorStopAtPosition(position);
+            });
+            const previewBox = new Gtk.Box({
+                orientation: Gtk.Orientation.VERTICAL,
+                margin_start: 12,
+                margin_end: 12,
+                margin_top: 12,
+                margin_bottom: 12,
+            });
+            previewBox.append(this.#gradientPreview);
+            colorGroup.add(previewBox);
+            // Color Stops List Group
+            const colorListGroup = new Adw.PreferencesGroup({
+                title: 'Color Stops',
+                description: 'Fine-tune color stops',
+            });
+            page.add(colorListGroup);
+            this.#colorStopsListBox = new Gtk.ListBox({
+                selection_mode: Gtk.SelectionMode.NONE,
+                css_classes: ['boxed-list'],
+            });
+            colorListGroup.add(this.#colorStopsListBox);
             this.#rebuildColorStopsList();
-        });
-        this.#gradientPreview.connect('stop-position-changed', (_widget, index, position) => {
-            this.#gradientStops[index].position = position;
-            if (this.#positionLabels[index]) {
-                this.#positionLabels[index].set_label(`${Math.round(position * 100)}%`);
-            }
-        });
-        this.#gradientPreview.connect('stop-added', (_widget, position) => {
-            this.#addColorStopAtPosition(position);
-        });
-        const previewBox = new Gtk.Box({
-            orientation: Gtk.Orientation.VERTICAL,
-            margin_start: 12,
-            margin_end: 12,
-            margin_top: 12,
-            margin_bottom: 12,
-        });
-        previewBox.append(this.#gradientPreview);
-        colorGroup.add(previewBox);
-        // Color Stops List Group
-        const colorListGroup = new Adw.PreferencesGroup({
-            title: 'Color Stops',
-            description: 'Fine-tune color stops',
-        });
-        page.add(colorListGroup);
-        this.#colorStopsListBox = new Gtk.ListBox({
-            selection_mode: Gtk.SelectionMode.NONE,
-            css_classes: ['boxed-list'],
-        });
-        colorListGroup.add(this.#colorStopsListBox);
-        this.#rebuildColorStopsList();
-        // Add Color Stop Button
-        const addStopButton = new Gtk.Button({
-            label: 'Add Color Stop',
-            icon_name: 'list-add-symbolic',
-            css_classes: ['suggested-action'],
-            margin_top: 12,
-        });
-        addStopButton.connect('clicked', () => {
-            this.#addColorStop();
-        });
-        colorListGroup.add(addStopButton);
-        // Parameters Group
-        const paramsGroup = new Adw.PreferencesGroup({
-            title: 'Parameters',
-            description: 'Adjust gradient parameters',
-        });
-        page.add(paramsGroup);
-        // Angle (for linear gradients only)
-        const angleRow = new Adw.SpinRow({
-            title: 'Angle',
-            subtitle: 'Gradient direction (degrees)',
-            adjustment: new Gtk.Adjustment({
-                lower: 0,
-                upper: 360,
-                step_increment: 1,
-                page_increment: 10,
-            }),
-        });
-        angleRow.set_value(settings.get_int('angle'));
-        angleRow.connect('notify::value', (widget) => {
-            settings.set_int('angle', widget.value);
-        });
-        const updateAngleVisibility = () => {
-            const currentType = settings.get_string('gradient-type');
-            angleRow.set_visible(currentType === 'linear');
-        };
-        updateAngleVisibility();
-        gradientTypeRow.connect('notify::selected', () => {
+            // Add Color Stop Button
+            const addStopButton = new Gtk.Button({
+                label: 'Add Color Stop',
+                icon_name: 'list-add-symbolic',
+                css_classes: ['suggested-action'],
+                margin_top: 12,
+            });
+            addStopButton.connect('clicked', () => {
+                this.#addColorStop();
+            });
+            colorListGroup.add(addStopButton);
+            // Parameters Group
+            const paramsGroup = new Adw.PreferencesGroup({
+                title: 'Parameters',
+                description: 'Adjust gradient parameters',
+            });
+            page.add(paramsGroup);
+            // Angle (for linear gradients only)
+            const angleRow = new Adw.SpinRow({
+                title: 'Angle',
+                subtitle: 'Gradient direction (degrees)',
+                adjustment: new Gtk.Adjustment({
+                    lower: 0,
+                    upper: 360,
+                    step_increment: 1,
+                    page_increment: 10,
+                }),
+            });
+            angleRow.set_value(settings.get_int('angle'));
+            angleRow.connect('notify::value', (widget) => {
+                settings.set_int('angle', widget.value);
+            });
+            const updateAngleVisibility = () => {
+                const currentType = settings.get_string('gradient-type');
+                angleRow.set_visible(currentType === 'linear');
+            };
             updateAngleVisibility();
-        });
-        paramsGroup.add(angleRow);
-        // Noise seed (for noise gradients only)
-        const seedRow = new Adw.SpinRow({
-            title: 'Noise Seed',
-            subtitle: 'Seed for noise generation',
-            adjustment: new Gtk.Adjustment({
-                lower: 0,
-                upper: 20,
-                step_increment: 1,
-            }),
-        });
-        seedRow.set_value(settings.get_int('noise-seed'));
-        seedRow.connect('notify::value', (widget) => {
-            settings.set_int('noise-seed', widget.value);
-        });
-        const updateSeedVisibility = () => {
-            const currentType = settings.get_string('gradient-type');
-            seedRow.set_visible(currentType === 'noise');
-        };
-        updateSeedVisibility();
-        gradientTypeRow.connect('notify::selected', () => {
+            gradientTypeRow.connect('notify::selected', () => {
+                updateAngleVisibility();
+            });
+            paramsGroup.add(angleRow);
+            // Noise seed (for noise gradients only)
+            const seedRow = new Adw.SpinRow({
+                title: 'Noise Seed',
+                subtitle: 'Seed for noise generation',
+                adjustment: new Gtk.Adjustment({
+                    lower: 0,
+                    upper: 20,
+                    step_increment: 1,
+                }),
+            });
+            seedRow.set_value(settings.get_int('noise-seed'));
+            seedRow.connect('notify::value', (widget) => {
+                settings.set_int('noise-seed', widget.value);
+            });
+            const updateSeedVisibility = () => {
+                const currentType = settings.get_string('gradient-type');
+                seedRow.set_visible(currentType === 'noise');
+            };
             updateSeedVisibility();
-        });
-        paramsGroup.add(seedRow);
-        // Noise octaves (for noise gradients only)
-        const noiseOctavesRow = new Adw.SpinRow({
-            title: 'Octaves',
-            subtitle: 'Detail level for noise',
-            adjustment: new Gtk.Adjustment({
-                lower: 1,
-                upper: 8,
-                step_increment: 1,
-            }),
-        });
-        noiseOctavesRow.set_value(settings.get_int('noise-octaves'));
-        noiseOctavesRow.connect('notify::value', (widget) => {
-            settings.set_int('noise-octaves', widget.value);
-        });
-        const updateNoiseVisibility = () => {
-            const currentType = settings.get_string('gradient-type');
-            noiseOctavesRow.set_visible(currentType === 'noise');
-        };
-        updateNoiseVisibility();
-        gradientTypeRow.connect('notify::selected', () => {
+            gradientTypeRow.connect('notify::selected', () => {
+                updateSeedVisibility();
+            });
+            paramsGroup.add(seedRow);
+            // Noise octaves (for noise gradients only)
+            const noiseOctavesRow = new Adw.SpinRow({
+                title: 'Octaves',
+                subtitle: 'Detail level for noise',
+                adjustment: new Gtk.Adjustment({
+                    lower: 1,
+                    upper: 8,
+                    step_increment: 1,
+                }),
+            });
+            noiseOctavesRow.set_value(settings.get_int('noise-octaves'));
+            noiseOctavesRow.connect('notify::value', (widget) => {
+                settings.set_int('noise-octaves', widget.value);
+            });
+            const updateNoiseVisibility = () => {
+                const currentType = settings.get_string('gradient-type');
+                noiseOctavesRow.set_visible(currentType === 'noise');
+            };
             updateNoiseVisibility();
-        });
-        paramsGroup.add(noiseOctavesRow);
-        // Scale (for all gradients)
-        const scaleRow = new Adw.SpinRow({
-            title: 'Scale',
-            subtitle: 'Scale factor for all gradients',
-            adjustment: new Gtk.Adjustment({
-                lower: 1.0,
-                upper: 5.0,
-                step_increment: 0.2,
-                page_increment: 1.0,
-            }),
-            digits: 1,
-        });
-        scaleRow.set_value(settings.get_double('scale'));
-        scaleRow.connect('notify::value', (widget) => {
-            settings.set_double('scale', widget.value);
-        });
-        paramsGroup.add(scaleRow);
+            gradientTypeRow.connect('notify::selected', () => {
+                updateNoiseVisibility();
+            });
+            paramsGroup.add(noiseOctavesRow);
+            // Scale (for all gradients)
+            const scaleRow = new Adw.SpinRow({
+                title: 'Scale',
+                subtitle: 'Scale factor for all gradients',
+                adjustment: new Gtk.Adjustment({
+                    lower: 1.0,
+                    upper: 5.0,
+                    step_increment: 0.2,
+                    page_increment: 1.0,
+                }),
+                digits: 1,
+            });
+            scaleRow.set_value(settings.get_double('scale'));
+            scaleRow.connect('notify::value', (widget) => {
+                settings.set_double('scale', widget.value);
+            });
+            paramsGroup.add(scaleRow);
+        }
+        catch (e) {
+            const error = e;
+            logError(error, 'Failed to fill preferences window');
+        }
     }
     #rebuildColorStopsList() {
         if (!this.#colorStopsListBox)
