@@ -106,21 +106,22 @@ export default class ProceduralGradientExtension extends Extension {
     // Create custom SVG icon
     const svgIcon = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">  
   
+  <rect x="20" y="20" width="160" height="160" rx="24" fill="#7c7a77ff"/>
   <!-- 3x3 grid with diagonal gradient and spacing -->
   <!-- Row 1: Blue to cyan shades -->
-  <rect x="35" y="35" width="40" height="40" rx="9" fill="#272727ff"/>
-  <rect x="80" y="35" width="40" height="40" rx="9" fill="#494949ff"/>
-  <rect x="125" y="35" width="40" height="40" rx="9" fill="#bebebeff"/>
+  <rect x="35" y="35" width="40" height="40" rx="9" fill="#101b20"/>
+  <rect x="80" y="35" width="40" height="40" rx="9" fill="#1f1b1f"/>
+  <rect x="125" y="35" width="40" height="40" rx="9" fill="#2e1b1e"/>
   
   <!-- Row 2: Transitional shades -->
-  <rect x="35" y="80" width="40" height="40" rx="9" fill="#494949ff"/>
-  <rect x="80" y="80" width="40" height="40" rx="9" fill="#ecececff"/>
-  <rect x="125" y="80" width="40" height="40" rx="9" fill="#494949ff"/>
+  <rect x="35" y="80" width="40" height="40" rx="9" fill="#1f1b1f"/>
+  <rect x="80" y="80" width="40" height="40" rx="9" fill="#2e1b1e"/>
+  <rect x="125" y="80" width="40" height="40" rx="9" fill="#3d1b1d"/>
   
   <!-- Row 3: Purple to red shades -->
-  <rect x="35" y="125" width="40" height="40" rx="9" fill="#bebebeff"/>
-  <rect x="80" y="125" width="40" height="40" rx="9" fill="#494949ff"/>
-  <rect x="125" y="125" width="40" height="40" rx="9" fill="#272727ff"/>
+  <rect x="35" y="125" width="40" height="40" rx="9" fill="#2e1b1e"/>
+  <rect x="80" y="125" width="40" height="40" rx="9" fill="#3d1b1d"/>
+  <rect x="125" y="125" width="40" height="40" rx="9" fill="#4c1b1b"/>
 </svg>`;
 
     // @ts-ignore - TextEncoder is available in GJS

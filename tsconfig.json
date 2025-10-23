@@ -36,6 +36,6 @@
     /* Completeness */
     "skipLibCheck": true
   },
-  "include": ["gnome-shell.d.ts", "src/**/*"],
+  "include": ["gnome-shell.d.ts", "src/**/*", "types/**/*"],
   "exclude": ["node_modules", "dist", "schemas"]
 }
