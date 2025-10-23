@@ -2,7 +2,7 @@
 
 # Install script for Procedural Gradient Background extension
 
-EXTENSION_UUID="procedural-gradient-background@jan_krupicka"
+EXTENSION_UUID="procedural-gradient-background@krupickajan.github.io"
 INSTALL_DIR="$HOME/.local/share/gnome-shell/extensions/$EXTENSION_UUID"
 
 echo "Installing $EXTENSION_UUID..."

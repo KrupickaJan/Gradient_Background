@@ -28,6 +28,7 @@ export default class ProceduralGradientExtension extends Extension {
 
   constructor(metadata: ExtensionMetadata) {
     super(metadata);
+    // Only initialize static data - no GObject instances
     this._settings = null;
     this._settingsChangedId = null;
     this._cacheDir = null;
