@@ -12,11 +12,11 @@ A GNOME Shell extension that generates procedural gradient wallpapers in real-ti
 ## Installation
 
 1. Download this extension package
-2. Extract it to `~/.local/share/gnome-shell/extensions/procedural-gradient-background@jan_krupicka/`
+2. Extract it to `~/.local/share/gnome-shell/extensions/procedural-gradient-background@krupickajan.github.io/`
 3. Log out and log back in
 4. Enable the extension using GNOME Extensions or:
    ```bash
-   gnome-extensions enable procedural-gradient-background@jan_krupicka
+   gnome-extensions enable procedural-gradient-background@krupickajan.github.io
    ```
 
 ## Usage

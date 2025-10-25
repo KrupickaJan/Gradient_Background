@@ -88,7 +88,7 @@ export default class ProceduralGradientExtension extends Extension {
     // Create custom SVG icon
     const svgIcon = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">  
   
-  <rect x="20" y="20" width="160" height="160" rx="24" fill="#7c7a77ff"/>
+  <rect x="20" y="20" width="160" height="160" rx="24" fill="#bebcb8ff"/>
   <!-- 3x3 grid with diagonal gradient and spacing -->
   <!-- Row 1: Blue to cyan shades -->
   <rect x="35" y="35" width="40" height="40" rx="9" fill="#101b20"/>
