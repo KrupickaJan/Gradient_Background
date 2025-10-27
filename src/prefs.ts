@@ -4,13 +4,12 @@ import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 
 import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
-
 import {GradientPreviewWidget} from './widgets/GradientPreviewWidget.js';
 import * as GradientUtils from './utils/gradientUtils.js';
 import { GradientStop } from './utils/gradientUtils.js';
 
 export default class extends ExtensionPreferences {
-    #settings!: Gio.Settings;
+    #settings!: Gio.Settings | null;
     #gradientStops!: GradientStop[];
     #positionLabels!: Gtk.Label[];
     #colorStopsListBox?: Gtk.ListBox;
@@ -234,6 +233,14 @@ export default class extends ExtensionPreferences {
             const error = e as Error;
             logError(error, 'Failed to fill preferences window');
         }
+
+        window.connect('close-request', () => {
+            this.#settings = null;
+            this.#gradientStops = [];
+            this.#positionLabels = [];
+            this.#colorStopsListBox = undefined;
+            this.#gradientPreview = undefined;
+        });
     }
 
     #rebuildColorStopsList(): void {
