@@ -94,7 +94,6 @@ You'll need to provide screenshots showing:
 
 ### Installation Issues
 - Ensure all files are in the correct locations
-- Check that schemas are compiled
 - Verify metadata.json format
 
 ### Functionality Issues

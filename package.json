@@ -5,7 +5,7 @@
   "main": "extension.js",
   "scripts": {
     "build": "tsc && npm run copy-assets",
-    "copy-assets": "cp -r schemas dist/ && cp metadata.json dist/ && cp stylesheet.css dist/",
+    "copy-assets": "cp metadata.json dist/ && cp stylesheet.css dist/",
     "watch": "tsc --watch",
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1",

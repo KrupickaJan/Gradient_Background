@@ -22,10 +22,6 @@ mkdir -p "$INSTALL_DIR"
 echo "Copying extension files..."
 cp -r dist/* "$INSTALL_DIR/"
 
-# Compile GSettings schemas
-echo "Compiling GSettings schemas..."
-glib-compile-schemas "$INSTALL_DIR/schemas/"
-
 echo "Extension files copied successfully!"
 echo ""
 echo "To apply changes, you need to restart GNOME Shell:"

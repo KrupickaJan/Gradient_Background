@@ -61,14 +61,7 @@ mkdir -p ~/.local/share/gnome-shell/extensions/procedural-gradient-background@ja
 cp -r * ~/.local/share/gnome-shell/extensions/procedural-gradient-background@jan_krupicka/
 ```
 
-2. Compile the GSettings schema:
-
-```bash
-cd ~/.local/share/gnome-shell/extensions/procedural-gradient-background@jan_krupicka
-glib-compile-schemas schemas/
-```
-
-3. **Log out and log back in**, then enable the extension
+2. **Log out and log back in**, then enable the extension
 
 ## Configuration
 
@@ -152,9 +145,6 @@ procedural-gradient-background@jan_krupicka/
 ├── prefs.js             # Preferences UI with dynamic color stops
 ├── metadata.json        # Extension metadata
 ├── stylesheet.css       # Panel indicator styles
-├── schemas/             # GSettings schemas
-│   ├── org.gnome.shell.extensions.procedural-gradient-background.gschema.xml
-│   └── gschemas.compiled
 ├── install.sh           # Installation script
 ├── uninstall.sh         # Uninstallation script
 └── README.md            # This file

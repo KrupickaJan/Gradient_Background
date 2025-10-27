@@ -29,9 +29,6 @@ cp metadata.json "$RELEASE_DIR/"
 cp stylesheet.css "$RELEASE_DIR/"
 cp icon.svg "$RELEASE_DIR/"
 
-# Copy schemas directory
-cp -r dist/schemas "$RELEASE_DIR/"
-
 # Create README for the package
 cat > "$RELEASE_DIR/README.md" << 'EOF'
 # Procedural Gradient Background
