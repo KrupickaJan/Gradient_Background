@@ -4,8 +4,9 @@
   "description": "A GNOME Shell extension that generates procedural gradient wallpapers in real-time for your desktop.",
   "main": "extension.js",
   "scripts": {
-    "build": "tsc && npm run copy-assets",
-    "copy-assets": "cp metadata.json dist/ && cp stylesheet.css dist/",
+    "build": "tsc && npm run copy-assets && npm run compile-schemas",
+    "copy-assets": "cp metadata.json dist/ && cp stylesheet.css dist/ && mkdir -p dist/schemas && cp schemas/*.xml dist/schemas/",
+    "compile-schemas": "glib-compile-schemas dist/schemas/",
     "watch": "tsc --watch",
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1",

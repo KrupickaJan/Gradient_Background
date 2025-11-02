@@ -23,11 +23,15 @@ npm run build
 echo "Copying files to release package..."
 
 # Core extension files
-cp dist/extension.js "$RELEASE_DIR/"
-cp dist/prefs.js "$RELEASE_DIR/"
-cp metadata.json "$RELEASE_DIR/"
-cp stylesheet.css "$RELEASE_DIR/"
-cp icon.svg "$RELEASE_DIR/"
+cp -a dist/* "$RELEASE_DIR/"
+
+# Remove TypeScript declaration files and source maps (not needed for runtime)
+echo "Removing unnecessary files..."
+find "$RELEASE_DIR" -type f \( -name "*.d.ts" -o -name "*.d.ts.map" -o -name "*.ts" \) -delete
+
+# Compile GSettings schemas for the release
+echo "Compiling GSettings schemas..."
+glib-compile-schemas "$RELEASE_DIR/schemas/"
 
 # Create README for the package
 cat > "$RELEASE_DIR/README.md" << 'EOF'

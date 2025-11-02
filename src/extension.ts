@@ -80,6 +80,7 @@ export default class ProceduralGradientExtension extends Extension {
     }
 
     this._settings = null;
+    this._cacheDir = null;
   }
 
   _createIndicator(): void {
@@ -88,24 +89,11 @@ export default class ProceduralGradientExtension extends Extension {
     
 
     // Create custom SVG icon
-    const svgIcon = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">  
-  
-  <rect x="20" y="20" width="160" height="160" rx="24" fill="#bebbb7ff"/>
-  <!-- 3x3 grid with diagonal gradient and spacing -->
-  <!-- Row 1: Blue to cyan shades -->
-  <rect x="35" y="35" width="40" height="40" rx="9" fill="#002346"/>
-  <rect x="80" y="35" width="40" height="40" rx="9" fill="#252241"/>
-  <rect x="125" y="35" width="40" height="40" rx="9" fill="#52203a"/>
-  
-  <!-- Row 2: Transitional shades -->
-  <rect x="35" y="80" width="40" height="40" rx="9" fill="#252241"/>
-  <rect x="80" y="80" width="40" height="40" rx="9" fill="#52203a"/>
-  <rect x="125" y="80" width="40" height="40" rx="9" fill="#791f34"/>
-  
-  <!-- Row 3: Purple to red shades -->
-  <rect x="35" y="125" width="40" height="40" rx="9" fill="#52203a"/>
-  <rect x="80" y="125" width="40" height="40" rx="9" fill="#791f34"/>
-  <rect x="125" y="125" width="40" height="40" rx="9" fill="#a51d2d"/>
+    const svgIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="18" height="18" rx="2" stroke="#ffffffff" stroke-width="2"/>
+    <rect x="3" y="15" width="18" height="6" fill="#ffffffff"/>
+    <rect x="3" y="9" width="18" height="6" fill="#ffffffff" fill-opacity="0.6"/>
+    <rect x="3" y="3" width="18" height="6" fill="#ffffffff" fill-opacity="0.3"/>
 </svg>
 `;
 
